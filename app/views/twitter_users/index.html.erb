@@ -1,0 +1,34 @@
+<h1>Listing twitter_users</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Location</th>
+    <th>Profile image url</th>
+    <th>Url</th>
+    <th>Twitter</th>
+    <th>Followers count</th>
+    <th>Description</th>
+    <th>Screen name</th>
+  </tr>
+
+<% for twitter_user in @twitter_users %>
+  <tr>
+    <td><%=h twitter_user.name %></td>
+    <td><%=h twitter_user.location %></td>
+    <td><%=h twitter_user.profile_image_url %></td>
+    <td><%=h twitter_user.url %></td>
+    <td><%=h twitter_user.twitter_id %></td>
+    <td><%=h twitter_user.followers_count %></td>
+    <td><%=h twitter_user.description %></td>
+    <td><%=h twitter_user.screen_name %></td>
+    <td><%= link_to 'Show', twitter_user %></td>
+    <td><%= link_to 'Edit', edit_twitter_user_path(twitter_user) %></td>
+    <td><%= link_to 'Destroy', twitter_user, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New twitter_user', new_twitter_user_path %>

@@ -1,0 +1,274 @@
+
+
+
+/* neco stylesheet */
+
+body {
+  margin: 0;
+  padding: 0;
+  background: white;
+  font: 0.8em/1.4 Arial, Verdana, 'Lucida Grande', sans-serif;
+  color: #505050; }
+
+a {
+  color: #505050;
+  text-decoration: underline; }
+  a img {
+    border: 0; }
+
+a:hover {
+  color: #910404;
+  text-decoration: underline; }
+
+
+
+div#bg {
+  padding: 0 15px;
+  background: white url('http://www.neco.com/images/bg.jpg') repeat-x top center; }
+
+
+
+div#footer {
+  margin: 18px 10px;
+  text-align: center;
+  color: #505050; }
+  div#footer a {
+    font-weight: bold; }
+  div#footer div#jargon div#legal {
+    font-size: 0.8em; }
+    div#footer div#jargon div#legal a {
+      font-weight: normal; }
+  div#footer div#seals {
+    margin-top: 15px; }
+    div#footer div#seals a, div#footer div#seals img {
+      margin: 0 10px; }
+    div#footer div#seals a img {
+      margin: 0; }
+
+
+
+div.spacer1, div.spacer2, div.spacer3 {
+  font-size: 1px; }
+
+div.spacer1 {
+  height: 1px; }
+
+div.spacer2 {
+  height: 2px; }
+
+div.spacer3 {
+  height: 5px; }
+
+
+@media print {
+  body {
+    background: white;
+    font-size: 12pt;
+    color: #144087; }
+
+  div.sub_nav {
+    display: none; }
+
+  h1 {
+    background: white;
+    color: #144087;
+    border-width: 3px;
+    border-style: solid;
+    border-color: #144087; } }
+
+div#container {
+  width: 981px;
+  margin: 0 auto; }
+
+div#print_header {
+  display: none; }
+
+div#header {
+  height: 100px;
+  margin-bottom: 5px;
+  background: url('http://www.neco.com/images/header.jpg') no-repeat top left; }
+  div#header a#home {
+    float: left;
+    display: block;
+    background: url('http://www.neco.com/images/logo.jpg') no-repeat top left;
+    height: 46px;
+    width: 177px;
+    margin: 10px 0 0 20px; }
+  div#header div#top_right_container {
+    float: right;
+    height: 47px;
+    padding-top: 3px;
+    margin: 0 15px 0 90px;
+    text-align: right;
+    color: #144087;
+    font-size: 12px; }
+    div#header div#top_right_container div#top_right a {
+      color: #144087;
+      font-weight: bold; }
+    div#header div#top_right_container div#top_right a:hover {
+      color: #910404; }
+  div#header table#top_nav {
+    clear: right;
+    margin: 0 20px 0 auto; }
+    div#header table#top_nav a {
+      display: block;
+      background: url('http://www.neco.com/images/tab_m.jpg') repeat-x top left;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+      margin-right: 3px; }
+      div#header table#top_nav a span.left {
+        display: block;
+        background: url('http://www.neco.com/images/tab_l.jpg') no-repeat top left; }
+      div#header table#top_nav a span.right {
+        display: block;
+        background: url('http://www.neco.com/images/tab_r.jpg') no-repeat top right;
+        padding: 3px 12px 0 12px;
+        height: 26px;
+        cursor: pointer; }
+    div#header table#top_nav a:hover, div#header table#top_nav a.hover {
+      background: #5e81b8;
+      color: white; }
+      div#header table#top_nav a:hover span.left,       div#header table#top_nav a.hover span.left {
+        background-position: bottom left; }
+      div#header table#top_nav a:hover span.right,       div#header table#top_nav a.hover span.right {
+        background-position: bottom right; }
+    div#header table#top_nav td {
+      white-space: nowrap; }
+
+
+
+
+div#content_top {
+  background-color: #f7f7f7;
+  background-image: url('http://www.neco.com/images/content_t.jpg');
+  background-repeat: repeat-x;
+  background-position: top left; }
+
+div#content_right {
+  background: url('http://www.neco.com/images/content_r.jpg') repeat-y top right; }
+
+div#content_bottom {
+  background: url('http://www.neco.com/images/content_b.jpg') repeat-x bottom left; }
+
+div#content_left {
+  background: url('http://www.neco.com/images/content_l.jpg') repeat-y top left; }
+
+div#content_top_left {
+  background: url('http://www.neco.com/images/content_tl.jpg') no-repeat top left; }
+
+div#content_top_right {
+  background: url('http://www.neco.com/images/content_tr.jpg') no-repeat top right; }
+
+div#content_bottom_right {
+  background: url('http://www.neco.com/images/content_br.jpg') no-repeat bottom right; }
+
+div#content_bottom_left {
+  background: url('http://www.neco.com/images/content_bl.jpg') no-repeat bottom left; }
+
+table#content_middle {
+  width: 100%; }
+  table#content_middle td#content_middle_cell {
+    padding: 9px 12px 11px 12px;
+    height: 100px;
+    vertical-align: top; }
+
+
+
+
+@media print {
+  div#header {
+    display: none; }
+
+  div#print_header {
+    display: block; }
+
+  div#footer div#nav {
+    display: none; } }
+
+
+
+div#header div#affiliate_name_container {
+  float: left;
+  margin: 5px 0 0 20px;
+  line-height: 1.2; }
+div#header a#affiliate_name {
+  font-size: 1.7em;
+  font-weight: bold;
+  color: #144087;
+  text-decoration: none; }
+div#header a#affiliate_name:hover {
+  color: #507cc3;
+  text-decoration: none; }
+div#header a#powered_by {
+  font-size: 0.9em;
+  text-decoration: none; }
+div#header a#powered_by:hover {
+  text-decoration: none; }
+div#header a.home_christmas {
+  background: url('http://www.neco.com/images/christmas_logo.jpg') no-repeat top left;
+  height: 51px;
+  width: 194px; }
+div#header div#top_right_container {
+  float: right;
+  height: 47px;
+  padding-top: 3px;
+  margin: 0 15px 0 90px;
+  text-align: right;
+  color: #144087;
+  font-size: 12px; }
+  
+  
+  
+  div#header div#top_right_container div#top_right a#checkout_link {
+    color: #910404; }
+  div#header div#top_right_container div#top_right a#checkout_link:hover {
+    color: #c33636; }
+  div#header div#top_right_container div#top_right form#login_form {
+    white-space: nowrap; }
+    div#header div#top_right_container div#top_right form#login_form input {
+      border-width: 1px;
+      border-style: solid;
+      border-color: #6490d7;
+      color: #144087;
+      background-color: white; }
+    div#header div#top_right_container div#top_right form#login_form input.button {
+      border-width: 1px;
+      border-style: outset;
+      border-color: #6490d7;
+      background-color: #144087;
+      color: white;
+      font-weight: bold; }
+      
+      
+      
+      
+      
+      
+    div#header div#top_right_container div#top_right form#login_form div.field_with_errors, div#header div#top_right_container div#top_right form#login_form div.field_without_errors {
+      display: inline;
+      margin: 0;
+      padding: 0;
+      background: none; }
+    div#header div#top_right_container div#top_right form#login_form div.field_with_errors input {
+      border-width: 3px;
+      border-style: solid;
+      border-color: #910404; }
+  div#header div#top_right_container div#top_right img#shopping_cart_icon {
+    margin-right: 4px;
+    position: relative;
+    top: 3px; }
+    
+    
+    
+div#header div#phone_number {
+  position: relative;
+  top: -2px;
+  margin-left: 16px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold; }
+  div#header div#phone_number img {
+    position: relative;
+    top: 1px;
+    margin-right: 4px; }

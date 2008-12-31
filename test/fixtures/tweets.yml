@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  tweeted_at: 2008-12-30 14:13:20
+  tweet_text: MyString
+  tweet_id: 1
+  in_reply_to_screen_name: MyString
+
+two:
+  tweeted_at: 2008-12-30 14:13:20
+  tweet_text: MyString
+  tweet_id: 1
+  in_reply_to_screen_name: MyString

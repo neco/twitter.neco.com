@@ -1,0 +1,43 @@
+<p>
+  <b>Name:</b>
+  <%=h @twitter_user.name %>
+</p>
+
+<p>
+  <b>Location:</b>
+  <%=h @twitter_user.location %>
+</p>
+
+<p>
+  <b>Profile image url:</b>
+  <%=h @twitter_user.profile_image_url %>
+</p>
+
+<p>
+  <b>Url:</b>
+  <%=h @twitter_user.url %>
+</p>
+
+<p>
+  <b>Twitter:</b>
+  <%=h @twitter_user.twitter_id %>
+</p>
+
+<p>
+  <b>Followers count:</b>
+  <%=h @twitter_user.followers_count %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%=h @twitter_user.description %>
+</p>
+
+<p>
+  <b>Screen name:</b>
+  <%=h @twitter_user.screen_name %>
+</p>
+
+
+<%= link_to 'Edit', edit_twitter_user_path(@twitter_user) %> |
+<%= link_to 'Back', twitter_users_path %>
