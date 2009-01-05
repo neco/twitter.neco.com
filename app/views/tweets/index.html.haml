@@ -1,9 +1,19 @@
-%img{:src => '/images/twitter.png', :alt => 'Twitter Logo', :style => 'float:right'}/
+%div{:style => 'float: right; margin-top: -18px'}
+  / AddThis Button BEGIN 
+  :javascript
+    var addthis_pub = "necotweet";
+  %a{:href => "http://www.addthis.com/bookmark.php", :onmouseover => "return addthis_open(this, '', 'http://twitter.neco.com', 'The Reality Twitter Show at National Event Company - Ticket Brokers - Rated R')", :onmouseout => "addthis_close()", :onclick => "return addthis_sendto()"}
+    %img{:src => "http://s7.addthis.com/static/btn/lg-addthis-en.gif", :width => "125", :height => "16", :border => "0", :alt => ""}/
+  %script{:type => "text/javascript", :src => "http://s7.addthis.com/js/152/addthis_widget.js"}
+  / AddThis Button END
+  %br/
+  %img{:src => '/images/twitter.png', :alt => 'Twitter Logo'}/
 
 %h1 The Neco Reality Ticket Broker Show
 %p
   Live From New York... it's the funniest and most entertaining reality twitter show available online.  Ever wonder what goes on in the office of a ticket broker.  Tune in to twitter.neco.com to keep up with the characters that make up this secondary ticket market leader.
 %p Who knows, you might even pick up some insider tips along the way...
+
 #tweet_container
   = render :partial => 'tweet', :collection => @tweets, :spacer_template => 'spacer'
 
