@@ -1,7 +1,7 @@
 class TweetsController < ApplicationController
   def index
     search_opts = params[:search] || {}
-    search_opts[:per_page] ||= 100
+    search_opts[:per_page] ||= 1
     search_opts[:order_by] = :tweeted_at
     search_opts[:order_as] = 'DESC'
     @search = Tweet.new_search(search_opts)
