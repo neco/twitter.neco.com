@@ -10,6 +10,8 @@
 
 #neco_content { padding-left: 15px; }
 
+p.notice { color: red; }
+
 .tweet img.user_image {
   border: 1px solid #aaa;
   float: left;
