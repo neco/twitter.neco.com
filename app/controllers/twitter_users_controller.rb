@@ -10,15 +10,9 @@ class TwitterUsersController < ApplicationController
     end
   end
 
-  # GET /twitter_users/1
-  # GET /twitter_users/1.xml
   def show
-    @twitter_user = TwitterUser.find(params[:id])
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.xml  { render :xml => @twitter_user }
-    end
+    @twitter_user = TwitterUser.find_by_screen_name(params[:screen_name])
+    render :action => :show, :layout => 'application'
   end
 
   # GET /twitter_users/new
@@ -45,7 +39,7 @@ class TwitterUsersController < ApplicationController
     respond_to do |format|
       if @twitter_user.save
         flash[:notice] = 'TwitterUser was successfully created.'
-        format.html { redirect_to(@twitter_user) }
+        format.html { redirect_to(:twitter_users) }
         format.xml  { render :xml => @twitter_user, :status => :created, :location => @twitter_user }
       else
         format.html { render :action => "new" }

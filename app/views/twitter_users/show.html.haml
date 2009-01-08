@@ -1,0 +1,30 @@
+= link_to '&lt;-- Back to all users', url_for(:controller => 'tweets', :action => 'index')
+
+#profile
+  = image_tag(@twitter_user.profile_image_url, :class => 'user_image')
+  %h1= @twitter_user.screen_name
+  
+  #profile-details
+    - if @twitter_user.name
+      %br/
+      %strong
+        Name
+      = @twitter_user.name
+    - if @twitter_user.location
+      %br/
+      %strong
+        Location
+      = @twitter_user.location
+    - if @twitter_user.url
+      %br/
+      %strong
+        Web
+      = link_to @twitter_user.url, @twitter_user.url
+    - if @twitter_user.description
+      %br/
+      %strong
+        Bio
+      = @twitter_user.description
+    
+#tweet_container{:style => 'clear:both'}
+  = render :partial => 'tweets/profile_tweet', :collection => @twitter_user.tweets, :spacer_template => 'tweets/spacer'

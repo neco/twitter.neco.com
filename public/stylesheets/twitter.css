@@ -3,6 +3,21 @@
   clear: left;
 }
 
+#profile { margin-top: 20px; }
+
+#profile .user_image { float:left; }
+
+#profile h1 {
+  float: left;
+  padding-left: 20px;
+  margin-top: 0;
+}
+
+#profile-details {
+  float: left;
+  padding-left: 30px;
+  margin-top: -20px;
+}
 
 #tweet_container {
   padding: 15px 0 15px 0;

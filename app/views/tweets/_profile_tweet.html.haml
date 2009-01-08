@@ -1,0 +1,5 @@
+%div{:class => "tweet#{' first' if profile_tweet_counter == 0}"}
+  .content
+    .text= parse_tweet(profile_tweet.tweet_text)
+    .details
+      = profile_tweet.tweeted_at.strftime('%l:%M %p Eastern - %a %D')
