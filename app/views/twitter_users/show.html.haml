@@ -5,22 +5,22 @@
   %h1= @twitter_user.screen_name
   
   #profile-details
-    - if @twitter_user.name
+    - if @twitter_user.name && !@twitter_user.name.blank?
       %br/
       %strong
         Name
       = @twitter_user.name
-    - if @twitter_user.location
+    - if @twitter_user.location && !@twitter_user.location.blank?
       %br/
       %strong
         Location
       = @twitter_user.location
-    - if @twitter_user.url
+    - if @twitter_user.url && !@twitter_user.url.blank?
       %br/
       %strong
         Web
       = link_to @twitter_user.url, @twitter_user.url
-    - if @twitter_user.description
+    - if @twitter_user.description && !@twitter_user.description.blank?
       %br/
       %strong
         Bio
