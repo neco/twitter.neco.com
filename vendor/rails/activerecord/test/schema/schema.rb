@@ -195,13 +195,6 @@ ActiveRecord::Schema.define do
 
   create_table :members, :force => true do |t|
     t.string :name
-    t.integer :member_type_id
-  end
-
-  create_table :member_details, :force => true do |t|
-    t.integer :member_id
-    t.integer :organization_id
-    t.string :extra_data
   end
 
   create_table :memberships, :force => true do |t|
@@ -209,10 +202,6 @@ ActiveRecord::Schema.define do
     t.integer :club_id, :member_id
     t.boolean :favourite, :default => false
     t.string :type
-  end
-
-  create_table :member_types, :force => true do |t|
-    t.string :name
   end
 
   create_table :references, :force => true do |t|
@@ -260,10 +249,6 @@ ActiveRecord::Schema.define do
     t.integer :shipping_customer_id
   end
 
-  create_table :organizations, :force => true do |t|
-    t.string :name
-  end
-
   create_table :owners, :primary_key => :owner_id ,:force => true do |t|
     t.string :name
   end
@@ -298,10 +283,8 @@ ActiveRecord::Schema.define do
   end
 
   create_table :people, :force => true do |t|
-    t.string     :first_name, :null => false
-    t.references :primary_contact
-    t.string     :gender, :limit => 1
-    t.integer    :lock_version, :null => false, :default => 0
+    t.string  :first_name, :null => false
+    t.integer :lock_version, :null => false, :default => 0
   end
 
   create_table :pets, :primary_key => :pet_id ,:force => true do |t|

@@ -4,7 +4,6 @@ require 'action_controller' # console_app uses 'action_controller/integration'
 
 unless defined? ApplicationController
   class ApplicationController < ActionController::Base; end
-  ActionController::Base.session_store = nil
 end
 
 require 'dispatcher'

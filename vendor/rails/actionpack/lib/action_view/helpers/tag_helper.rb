@@ -1,4 +1,5 @@
-require 'action_view/erb/util'
+require 'cgi'
+require 'erb'
 require 'set'
 
 module ActionView
@@ -8,7 +9,7 @@ module ActionView
     module TagHelper
       include ERB::Util
 
-      BOOLEAN_ATTRIBUTES = %w(disabled readonly multiple checked).to_set
+      BOOLEAN_ATTRIBUTES = %w(disabled readonly multiple).to_set
       BOOLEAN_ATTRIBUTES.merge(BOOLEAN_ATTRIBUTES.map(&:to_sym))
 
       # Returns an empty HTML tag of type +name+ which by default is XHTML
@@ -97,7 +98,7 @@ module ActionView
       # Returns an escaped version of +html+ without affecting existing escaped entities.
       #
       # ==== Examples
-      #   escape_once("1 < 2 &amp; 3")
+      #   escape_once("1 > 2 &amp; 3")
       #   # => "1 &lt; 2 &amp; 3"
       #
       #   escape_once("&lt;&lt; Accept & Checkout")

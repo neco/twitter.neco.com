@@ -313,13 +313,12 @@ module ActiveSupport #:nodoc:
         nesting = expanded_path[(expanded_root.size)..-1]
         nesting = nesting[1..-1] if nesting && nesting[0] == ?/
         next if nesting.blank?
-        nesting_camel = nesting.camelize
-        begin
-          qualified_const_defined?(nesting_camel)
-        rescue NameError
-          next
-        end
-        [ nesting_camel ]
+
+        [
+          nesting.camelize,
+          # Special case: application.rb might define ApplicationControlller.
+          ('ApplicationController' if nesting == 'application')
+        ]
       end.flatten.compact.uniq
     end
 
@@ -500,7 +499,7 @@ module ActiveSupport #:nodoc:
           initial_constants = if qualified_const_defined?(mod_name)
             mod_name.constantize.local_constant_names
           else
-            []
+           []
           end
         else
           raise Argument, "#{desc.inspect} does not describe a module!"
@@ -559,9 +558,9 @@ module ActiveSupport #:nodoc:
       # Old style environment.rb referenced this method directly.  Please note, it doesn't
       # actually *do* anything any more.
       def self.root(*args)
-        if defined?(Rails) && Rails.logger
-          Rails.logger.warn "Your environment.rb uses the old syntax, it may not continue to work in future releases."
-          Rails.logger.warn "For upgrade instructions please see: http://manuals.rubyonrails.com/read/book/19"
+        if defined?(RAILS_DEFAULT_LOGGER)
+          RAILS_DEFAULT_LOGGER.warn "Your environment.rb uses the old syntax, it may not continue to work in future releases."
+          RAILS_DEFAULT_LOGGER.warn "For upgrade instructions please see: http://manuals.rubyonrails.com/read/book/19"
         end
       end
     end

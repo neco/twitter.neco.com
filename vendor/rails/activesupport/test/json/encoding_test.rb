@@ -126,13 +126,15 @@ class TestJSONEncoding < Test::Unit::TestCase
     end
 end
 
-class JsonOptionsTests < Test::Unit::TestCase
-  def test_enumerable_should_passthrough_options_to_elements
-    json_options = { :include => :posts }
-    ActiveSupport::JSON.expects(:encode).with(1, json_options)
-    ActiveSupport::JSON.expects(:encode).with(2, json_options)
-    ActiveSupport::JSON.expects(:encode).with('foo', json_options)
+uses_mocha 'JsonOptionsTests' do
+  class JsonOptionsTests < Test::Unit::TestCase
+    def test_enumerable_should_passthrough_options_to_elements
+      json_options = { :include => :posts }
+      ActiveSupport::JSON.expects(:encode).with(1, json_options)
+      ActiveSupport::JSON.expects(:encode).with(2, json_options)
+      ActiveSupport::JSON.expects(:encode).with('foo', json_options)
 
-    [1, 2, 'foo'].to_json(json_options)
+      [1, 2, 'foo'].to_json(json_options)
+    end
   end
 end

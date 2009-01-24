@@ -13,25 +13,23 @@ module MysqlCompat #:nodoc:
     # C driver >= 2.7 returns null values in each_hash
     if Mysql.const_defined?(:VERSION) && (Mysql::VERSION.is_a?(String) || Mysql::VERSION >= 20700)
       target.class_eval <<-'end_eval'
-      def all_hashes                     # def all_hashes
-        rows = []                        #   rows = []
-        each_hash { |row| rows << row }  #   each_hash { |row| rows << row }
-        rows                             #   rows
-      end                                # end
+      def all_hashes
+        rows = []
+        each_hash { |row| rows << row }
+        rows
+      end
       end_eval
 
     # adapters before 2.7 don't have a version constant
     # and don't return null values in each_hash
     else
       target.class_eval <<-'end_eval'
-      def all_hashes                                            # def all_hashes
-        rows = []                                               #   rows = []
-        all_fields = fetch_fields.inject({}) { |fields, f|      #   all_fields = fetch_fields.inject({}) { |fields, f|
-          fields[f.name] = nil; fields                          #     fields[f.name] = nil; fields
-        }                                                       #   }
-        each_hash { |row| rows << all_fields.dup.update(row) }  #   each_hash { |row| rows << all_fields.dup.update(row) }
-        rows                                                    #   rows
-      end                                                       # end
+      def all_hashes
+        rows = []
+        all_fields = fetch_fields.inject({}) { |fields, f| fields[f.name] = nil; fields }
+        each_hash { |row| rows << all_fields.dup.update(row) }
+        rows
+      end
       end_eval
     end
 
@@ -158,16 +156,13 @@ module ActiveRecord
     # * <tt>:sslcapath</tt> - Necessary to use MySQL with an SSL connection.
     # * <tt>:sslcipher</tt> - Necessary to use MySQL with an SSL connection.
     #
+    # By default, the MysqlAdapter will consider all columns of type <tt>tinyint(1)</tt>
+    # as boolean. If you wish to disable this emulation (which was the default
+    # behavior in versions 0.13.1 and earlier) you can add the following line
+    # to your environment.rb file:
+    #
+    #   ActiveRecord::ConnectionAdapters::MysqlAdapter.emulate_booleans = false
     class MysqlAdapter < AbstractAdapter
-
-      ##
-      # :singleton-method:
-      # By default, the MysqlAdapter will consider all columns of type <tt>tinyint(1)</tt>
-      # as boolean. If you wish to disable this emulation (which was the default
-      # behavior in versions 0.13.1 and earlier) you can add the following line
-      # to your environment.rb file:
-      #
-      #   ActiveRecord::ConnectionAdapters::MysqlAdapter.emulate_booleans = false
       cattr_accessor :emulate_booleans
       self.emulate_booleans = true
 
@@ -310,7 +305,6 @@ module ActiveRecord
         rows
       end
 
-      # Executes a SQL query and returns a MySQL::Result object. Note that you have to free the Result object after you're done using it.
       def execute(sql, name = nil) #:nodoc:
         log(sql, name) { @connection.query(sql) }
       rescue ActiveRecord::StatementInvalid => exception
@@ -417,9 +411,7 @@ module ActiveRecord
 
       def tables(name = nil) #:nodoc:
         tables = []
-        result = execute("SHOW TABLES", name)
-        result.each { |field| tables << field[0] }
-        result.free
+        execute("SHOW TABLES", name).each { |field| tables << field[0] }
         tables
       end
 
@@ -430,8 +422,7 @@ module ActiveRecord
       def indexes(table_name, name = nil)#:nodoc:
         indexes = []
         current_index = nil
-        result = execute("SHOW KEYS FROM #{quote_table_name(table_name)}", name)
-        result.each do |row|
+        execute("SHOW KEYS FROM #{quote_table_name(table_name)}", name).each do |row|
           if current_index != row[2]
             next if row[2] == "PRIMARY" # skip the primary key
             current_index = row[2]
@@ -440,16 +431,13 @@ module ActiveRecord
 
           indexes.last.columns << row[4]
         end
-        result.free
         indexes
       end
 
       def columns(table_name, name = nil)#:nodoc:
         sql = "SHOW FIELDS FROM #{quote_table_name(table_name)}"
         columns = []
-        result = execute(sql, name)
-        result.each { |field| columns << MysqlColumn.new(field[0], field[4], field[1], field[2] == "YES") }
-        result.free
+        execute(sql, name).each { |field| columns << MysqlColumn.new(field[0], field[4], field[1], field[2] == "YES") }
         columns
       end
 
@@ -530,11 +518,9 @@ module ActiveRecord
       # Returns a table's primary key and belonging sequence.
       def pk_and_sequence_for(table) #:nodoc:
         keys = []
-        result = execute("describe #{quote_table_name(table)}")
-        result.each_hash do |h|
+        execute("describe #{quote_table_name(table)}").each_hash do |h|
           keys << h["Field"]if h["Key"] == "PRI"
         end
-        result.free
         keys.length == 1 ? [keys.first, nil] : nil
       end
 

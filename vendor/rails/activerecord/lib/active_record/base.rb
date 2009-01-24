@@ -389,8 +389,6 @@ module ActiveRecord #:nodoc:
   # So it's possible to assign a logger to the class through <tt>Base.logger=</tt> which will then be used by all
   # instances in the current object space.
   class Base
-    ##  
-    # :singleton-method:
     # Accepts a logger conforming to the interface of Log4r or the default Ruby 1.8+ Logger class, which is then passed
     # on to any new database connections made and which can be retrieved on both a class and instance level by calling +logger+.
     cattr_accessor :logger, :instance_writer => false
@@ -416,9 +414,7 @@ module ActiveRecord #:nodoc:
     end
 
     @@subclasses = {}
-    
-    ##
-    # :singleton-method:
+
     # Contains the database configuration - as is typically stored in config/database.yml -
     # as a Hash.
     #
@@ -447,8 +443,6 @@ module ActiveRecord #:nodoc:
     cattr_accessor :configurations, :instance_writer => false
     @@configurations = {}
 
-    ##
-    # :singleton-method:
     # Accessor for the prefix type that will be prepended to every primary key column name. The options are :table_name and
     # :table_name_with_underscore. If the first is specified, the Product class will look for "productid" instead of "id" as
     # the primary column. If the latter is specified, the Product class will look for "product_id" instead of "id". Remember
@@ -456,46 +450,34 @@ module ActiveRecord #:nodoc:
     cattr_accessor :primary_key_prefix_type, :instance_writer => false
     @@primary_key_prefix_type = nil
 
-    ##
-    # :singleton-method:
     # Accessor for the name of the prefix string to prepend to every table name. So if set to "basecamp_", all
     # table names will be named like "basecamp_projects", "basecamp_people", etc. This is a convenient way of creating a namespace
     # for tables in a shared database. By default, the prefix is the empty string.
     cattr_accessor :table_name_prefix, :instance_writer => false
     @@table_name_prefix = ""
 
-    ##
-    # :singleton-method:
     # Works like +table_name_prefix+, but appends instead of prepends (set to "_basecamp" gives "projects_basecamp",
     # "people_basecamp"). By default, the suffix is the empty string.
     cattr_accessor :table_name_suffix, :instance_writer => false
     @@table_name_suffix = ""
 
-    ##
-    # :singleton-method:
     # Indicates whether table names should be the pluralized versions of the corresponding class names.
     # If true, the default table name for a Product class will be +products+. If false, it would just be +product+.
     # See table_name for the full rules on table/class naming. This is true, by default.
     cattr_accessor :pluralize_table_names, :instance_writer => false
     @@pluralize_table_names = true
 
-    ##
-    # :singleton-method:
     # Determines whether to use ANSI codes to colorize the logging statements committed by the connection adapter. These colors
     # make it much easier to overview things during debugging (when used through a reader like +tail+ and on a black background), but
     # may complicate matters if you use software like syslog. This is true, by default.
     cattr_accessor :colorize_logging, :instance_writer => false
     @@colorize_logging = true
 
-    ##
-    # :singleton-method:
     # Determines whether to use Time.local (using :local) or Time.utc (using :utc) when pulling dates and times from the database.
     # This is set to :local by default.
     cattr_accessor :default_timezone, :instance_writer => false
     @@default_timezone = :local
 
-    ##
-    # :singleton-method:
     # Specifies the format to use when dumping the database schema with Rails'
     # Rakefile.  If :sql, the schema is dumped as (potentially database-
     # specific) SQL statements.  If :ruby, the schema is dumped as an
@@ -505,8 +487,6 @@ module ActiveRecord #:nodoc:
     cattr_accessor :schema_format , :instance_writer => false
     @@schema_format = :ruby
 
-    ##
-    # :singleton-method:
     # Specify whether or not to use timestamps for migration numbers
     cattr_accessor :timestamped_migrations , :instance_writer => false
     @@timestamped_migrations = true
@@ -514,10 +494,6 @@ module ActiveRecord #:nodoc:
     # Determine whether to store the full constant name including namespace when using STI
     superclass_delegating_accessor :store_full_sti_class
     self.store_full_sti_class = false
-
-    # Stores the default scope for the class
-    class_inheritable_accessor :default_scoping, :instance_writer => false
-    self.default_scoping = []
 
     class << self # Class methods
       # Find operates with four different retrieval approaches:
@@ -541,7 +517,6 @@ module ActiveRecord #:nodoc:
       # * <tt>:conditions</tt> - An SQL fragment like "administrator = 1", <tt>[ "user_name = ?", username ]</tt>, or <tt>["user_name = :user_name", { :user_name => user_name }]</tt>. See conditions in the intro.
       # * <tt>:order</tt> - An SQL fragment like "created_at DESC, name".
       # * <tt>:group</tt> - An attribute name by which the result should be grouped. Uses the <tt>GROUP BY</tt> SQL-clause.
-      # * <tt>:having</tt> - Combined with +:group+ this can be used to filter the records that a <tt>GROUP BY</tt> returns. Uses the <tt>HAVING</tt> SQL-clause.
       # * <tt>:limit</tt> - An integer determining the limit on the number of rows that should be returned.
       # * <tt>:offset</tt> - An integer determining the offset from where the rows should be fetched. So at 5, it would skip rows 0 through 4.
       # * <tt>:joins</tt> - Either an SQL fragment for additional joins like "LEFT JOIN comments ON comments.post_id = id" (rarely needed)
@@ -660,24 +635,16 @@ module ActiveRecord #:nodoc:
         connection.select_all(sanitize_sql(sql), "#{name} Load").collect! { |record| instantiate(record) }
       end
 
-
-      # Returns true if a record exists in the table that matches the +id+ or
-      # conditions given, or false otherwise. The argument can take four forms:
+      # Checks whether a record exists in the database that matches conditions given.  These conditions
+      # can either be a single integer representing a primary key id to be found, or a condition to be
+      # matched like using ActiveRecord#find.
       #
-      # * Integer - Finds the record with this primary key.
-      # * String - Finds the record with a primary key corresponding to this
-      #   string (such as <tt>'5'</tt>).
-      # * Array - Finds the record that matches these +find+-style conditions
-      #   (such as <tt>['color = ?', 'red']</tt>).
-      # * Hash - Finds the record that matches these +find+-style conditions
-      #   (such as <tt>{:color => 'red'}</tt>).
+      # The +id_or_conditions+ parameter can be an Integer or a String if you want to search the primary key
+      # column of the table for a matching id, or if you're looking to match against a condition you can use
+      # an Array or a Hash.
       #
-      # For more information about specifying conditions as a Hash or Array,
-      # see the Conditions section in the introduction to ActiveRecord::Base.
-      #
-      # Note: You can't pass in a condition as a string (like <tt>name =
-      # 'Jamie'</tt>), since it would be sanitized and then queried against
-      # the primary key column, like <tt>id = 'name = \'Jamie\''</tt>.
+      # Possible gotcha: You can't pass in a condition as a string e.g. "name = 'Jamie'", this would be
+      # sanitized and then queried against the primary key column as "id = 'name = \'Jamie"
       #
       # ==== Examples
       #   Person.exists?(5)
@@ -811,7 +778,8 @@ module ActiveRecord #:nodoc:
       #
       # ==== Parameters
       #
-      # * +updates+ - A string of column and value pairs that will be set on any records that match conditions. This creates the SET clause of the generated SQL.
+      # * +updates+ - A string of column and value pairs that will be set on any records that match conditions.
+      #               What goes into the SET clause.
       # * +conditions+ - An SQL fragment like "administrator = 1" or [ "user_name = ?", username ]. See conditions in the intro for more info.
       # * +options+ - Additional options are <tt>:limit</tt> and <tt>:order</tt>, see the examples for usage.
       #
@@ -1416,8 +1384,8 @@ module ActiveRecord #:nodoc:
       def benchmark(title, log_level = Logger::DEBUG, use_silence = true)
         if logger && logger.level <= log_level
           result = nil
-          ms = Benchmark.ms { result = use_silence ? silence { yield } : yield }
-          logger.add(log_level, '%s (%.1fms)' % [title, ms])
+          seconds = Benchmark.realtime { result = use_silence ? silence { yield } : yield }
+          logger.add(log_level, "#{title} (#{'%.1f' % (seconds * 1000)}ms)")
           result
         else
           yield
@@ -1456,10 +1424,7 @@ module ActiveRecord #:nodoc:
       def respond_to?(method_id, include_private = false)
         if match = DynamicFinderMatch.match(method_id)
           return true if all_attributes_exists?(match.attribute_names)
-        elsif match = DynamicScopeMatch.match(method_id)
-          return true if all_attributes_exists?(match.attribute_names)
         end
-        
         super
       end
 
@@ -1497,16 +1462,11 @@ module ActiveRecord #:nodoc:
           end
 
           if scoped?(:find, :order)
-            scope = scope(:find)
-            original_scoped_order = scope[:order]
-            scope[:order] = reverse_sql_order(original_scoped_order)
+            scoped_order = reverse_sql_order(scope(:find, :order))
+            scoped_methods.select { |s| s[:find].update(:order => scoped_order) }
           end
 
-          begin
-            find_initial(options.merge({ :order => order }))
-          ensure
-            scope[:order] = original_scoped_order if original_scoped_order
-          end
+          find_initial(options.merge({ :order => order }))
         end
 
         def reverse_sql_order(order_query)
@@ -1652,23 +1612,15 @@ module ActiveRecord #:nodoc:
           end
         end
 
-        def default_select(qualified)
-          if qualified
-            quoted_table_name + '.*'
-          else
-            '*'
-          end
-        end
-
         def construct_finder_sql(options)
           scope = scope(:find)
-          sql  = "SELECT #{options[:select] || (scope && scope[:select]) || default_select(options[:joins] || (scope && scope[:joins]))} "
+          sql  = "SELECT #{options[:select] || (scope && scope[:select]) || ((options[:joins] || (scope && scope[:joins])) && quoted_table_name + '.*') || '*'} "
           sql << "FROM #{(scope && scope[:from]) || options[:from] || quoted_table_name} "
 
           add_joins!(sql, options[:joins], scope)
           add_conditions!(sql, options[:conditions], scope)
 
-          add_group!(sql, options[:group], options[:having], scope)
+          add_group!(sql, options[:group], scope)
           add_order!(sql, options[:order], scope)
           add_limit!(sql, options, scope)
           add_lock!(sql, options, scope)
@@ -1724,15 +1676,13 @@ module ActiveRecord #:nodoc:
           end
         end
 
-        def add_group!(sql, group, having, scope = :auto)
+        def add_group!(sql, group, scope = :auto)
           if group
             sql << " GROUP BY #{group}"
-            sql << " HAVING #{having}" if having
           else
             scope = scope(:find) if :auto == scope
             if scope && (scoped_group = scope[:group])
               sql << " GROUP BY #{scoped_group}"
-              sql << " HAVING #{scoped_having}" if (scoped_having = scope[:having])
             end
           end
         end
@@ -1812,11 +1762,7 @@ module ActiveRecord #:nodoc:
         # This also enables you to initialize a record if it is not found, such as find_or_initialize_by_amount(amount)
         # or find_or_create_by_user_and_password(user, password).
         #
-        # Also enables dynamic scopes like scoped_by_user_name(user_name) and scoped_by_user_name_and_password(user_name, password) that
-        # are turned into scoped(:conditions => ["user_name = ?", user_name]) and scoped(:conditions => ["user_name = ? AND password = ?", user_name, password])
-        # respectively.
-        #
-        # Each dynamic finder, scope or initializer/creator is also defined in the class after it is first invoked, so that future
+        # Each dynamic finder or initializer/creator is also defined in the class after it is first invoked, so that future
         # attempts to use it do not run through method_missing.
         def method_missing(method_id, *arguments, &block)
           if match = DynamicFinderMatch.match(method_id)
@@ -1825,31 +1771,10 @@ module ActiveRecord #:nodoc:
             if match.finder?
               finder = match.finder
               bang = match.bang?
-              # def self.find_by_login_and_activated(*args)
-              #   options = args.extract_options!
-              #   attributes = construct_attributes_from_arguments(
-              #     [:login,:activated],
-              #     args
-              #   )
-              #   finder_options = { :conditions => attributes }
-              #   validate_find_options(options)
-              #   set_readonly_option!(options)
-              #
-              #   if options[:conditions]
-              #     with_scope(:find => finder_options) do
-              #       find(:first, options)
-              #     end
-              #   else
-              #     find(:first, options.merge(finder_options))
-              #   end
-              # end
               self.class_eval %{
                 def self.#{method_id}(*args)
                   options = args.extract_options!
-                  attributes = construct_attributes_from_arguments(
-                    [:#{attribute_names.join(',:')}],
-                    args
-                  )
+                  attributes = construct_attributes_from_arguments([:#{attribute_names.join(',:')}], args)
                   finder_options = { :conditions => attributes }
                   validate_find_options(options)
                   set_readonly_option!(options)
@@ -1861,37 +1786,12 @@ module ActiveRecord #:nodoc:
                   else
                     find(:#{finder}, options.merge(finder_options))
                   end
-                  #{'result || raise(RecordNotFound, "Couldn\'t find #{name} with #{attributes.to_a.collect {|pair| "#{pair.first} = #{pair.second}"}.join(\', \')}")' if bang}
+                  #{'result || raise(RecordNotFound)' if bang}
                 end
               }, __FILE__, __LINE__
               send(method_id, *arguments)
             elsif match.instantiator?
               instantiator = match.instantiator
-              # def self.find_or_create_by_user_id(*args)
-              #   guard_protected_attributes = false
-              #
-              #   if args[0].is_a?(Hash)
-              #     guard_protected_attributes = true
-              #     attributes = args[0].with_indifferent_access
-              #     find_attributes = attributes.slice(*[:user_id])
-              #   else
-              #     find_attributes = attributes = construct_attributes_from_arguments([:user_id], args)
-              #   end
-              #
-              #   options = { :conditions => find_attributes }
-              #   set_readonly_option!(options)
-              #
-              #   record = find(:first, options)
-              #
-              #   if record.nil?
-              #     record = self.new { |r| r.send(:attributes=, attributes, guard_protected_attributes) }
-              #     yield(record) if block_given?
-              #     record.save
-              #     record
-              #   else
-              #     record
-              #   end
-              # end
               self.class_eval %{
                 def self.#{method_id}(*args)
                   guard_protected_attributes = false
@@ -1920,22 +1820,6 @@ module ActiveRecord #:nodoc:
                 end
               }, __FILE__, __LINE__
               send(method_id, *arguments, &block)
-            end
-          elsif match = DynamicScopeMatch.match(method_id)
-            attribute_names = match.attribute_names
-            super unless all_attributes_exists?(attribute_names)
-            if match.scope?
-              self.class_eval %{
-                def self.#{method_id}(*args)                        # def self.scoped_by_user_name_and_password(*args)
-                  options = args.extract_options!                   #   options = args.extract_options!
-                  attributes = construct_attributes_from_arguments( #   attributes = construct_attributes_from_arguments(
-                    [:#{attribute_names.join(',:')}], args          #     [:user_name, :password], args
-                  )                                                 #   )
-                                                                    # 
-                  scoped(:conditions => attributes)                 #   scoped(:conditions => attributes)
-                end                                                 # end
-              }, __FILE__, __LINE__
-              send(method_id, *arguments)
             end
           else
             super
@@ -2124,16 +2008,6 @@ module ActiveRecord #:nodoc:
           @@subclasses[self] + extra = @@subclasses[self].inject([]) {|list, subclass| list + subclass.subclasses }
         end
 
-        # Sets the default options for the model. The format of the
-        # <tt>options</tt> argument is the same as in find.
-        #
-        #   class Person < ActiveRecord::Base
-        #     default_scope :order => 'last_name, first_name'
-        #   end
-        def default_scope(options = {})
-          self.default_scoping << { :find => options, :create => (options.is_a?(Hash) && options.has_key?(:conditions)) ? options[:conditions] : {} }
-        end
-
         # Test whether the given method and optional key are scoped.
         def scoped?(method, key = nil) #:nodoc:
           if current_scoped_methods && (scope = current_scoped_methods[method])
@@ -2149,7 +2023,7 @@ module ActiveRecord #:nodoc:
         end
 
         def scoped_methods #:nodoc:
-          Thread.current[:"#{self}_scoped_methods"] ||= self.default_scoping.dup
+          Thread.current[:"#{self}_scoped_methods"] ||= []
         end
 
         def current_scoped_methods #:nodoc:
@@ -2363,7 +2237,7 @@ module ActiveRecord #:nodoc:
         end
 
         VALID_FIND_OPTIONS = [ :conditions, :include, :joins, :limit, :offset,
-                               :order, :select, :readonly, :group, :having, :from, :lock ]
+                               :order, :select, :readonly, :group, :from, :lock ]
 
         def validate_find_options(options) #:nodoc:
           options.assert_valid_keys(VALID_FIND_OPTIONS)
@@ -2421,15 +2295,15 @@ module ActiveRecord #:nodoc:
       # object. The default implementation returns this record's id as a String,
       # or nil if this record's unsaved.
       #
-      # For example, suppose that you have a User model, and that you have a
-      # <tt>map.resources :users</tt> route. Normally, +user_path+ will
-      # construct a path with the user object's 'id' in it:
+      # For example, suppose that you have a Users model, and that you have a
+      # <tt>map.resources :users</tt> route. Normally, +users_path+ will
+      # construct an URI with the user object's 'id' in it:
       #
       #   user = User.find_by_name('Phusion')
-      #   user_path(user)  # => "/users/1"
+      #   user_path(path)  # => "/users/1"
       #
-      # You can override +to_param+ in your model to make +user_path+ construct
-      # a path using the user's name instead of the user's id:
+      # You can override +to_param+ in your model to make +users_path+ construct
+      # an URI using the user's name instead of the user's id:
       #
       #   class User < ActiveRecord::Base
       #     def to_param  # overridden
@@ -2438,7 +2312,7 @@ module ActiveRecord #:nodoc:
       #   end
       #   
       #   user = User.find_by_name('Phusion')
-      #   user_path(user)  # => "/users/Phusion"
+      #   user_path(path)  # => "/users/Phusion"
       def to_param
         # We can't use alias_method here, because method 'id' optimizes itself on the fly.
         (id = self.id) ? id.to_s : nil # Be sure to stringify the id for routes
@@ -2475,9 +2349,9 @@ module ActiveRecord #:nodoc:
         write_attribute(self.class.primary_key, value)
       end
 
-      # Returns true if this object hasn't been saved yet -- that is, a record for the object doesn't exist yet; otherwise, returns false.
+      # Returns true if this object hasn't been saved yet -- that is, a record for the object doesn't exist yet.
       def new_record?
-        @new_record || false
+        defined?(@new_record) && @new_record
       end
 
       # :call-seq:
@@ -3082,18 +2956,4 @@ module ActiveRecord #:nodoc:
         value
       end
   end
-
-  Base.class_eval do
-    extend QueryCache::ClassMethods
-    include Validations
-    include Locking::Optimistic, Locking::Pessimistic
-    include AttributeMethods
-    include Dirty
-    include Callbacks, Observing, Timestamp
-    include Associations, AssociationPreload, NamedScope
-    include Aggregations, Transactions, Reflection, Calculations, Serialization
-  end
 end
-
-# TODO: Remove this and make it work with LAZY flag
-require 'active_record/connection_adapters/abstract_adapter'

@@ -1,17 +1,9 @@
+require 'active_support/test_case'
+require 'action_controller/dispatcher'
+require 'action_controller/test_process'
+
 require 'stringio'
 require 'uri'
-require 'active_support/test_case'
-
-# Monkey patch Rack::Lint to support rewind
-module Rack
-  class Lint
-    class InputWrapper
-      def rewind
-        @input.rewind
-      end
-    end
-  end
-end
 
 module ActionController
   module Integration #:nodoc:
@@ -20,16 +12,12 @@ module ActionController
     # multiple sessions and run them side-by-side, you can also mimic (to some
     # limited extent) multiple simultaneous users interacting with your system.
     #
-    # Typically, you will instantiate a new session using
-    # IntegrationTest#open_session, rather than instantiating
-    # Integration::Session directly.
+    # Typically, you will instantiate a new session using IntegrationTest#open_session,
+    # rather than instantiating Integration::Session directly.
     class Session
       include Test::Unit::Assertions
-      include ActionController::TestCase::Assertions
+      include ActionController::Assertions
       include ActionController::TestProcess
-
-      # Rack application to use
-      attr_accessor :application
 
       # The integer HTTP status code of the last request.
       attr_reader :status
@@ -68,21 +56,11 @@ module ActionController
       # A running counter of the number of requests processed.
       attr_accessor :request_count
 
-      # Nonce value for Digest Authentication, implicitly set on response with WWW-Authentication
-      attr_accessor :nonce
-
-      # Opaque value for Digest Authentication, implicitly set on response with WWW-Authentication
-      attr_accessor :opaque
-
-      # Opaque value for Authentication, implicitly set on response with WWW-Authentication
-      attr_accessor :realm
-
       class MultiPartNeededException < Exception
       end
 
       # Create and initialize a new Session instance.
-      def initialize(app)
-        @application = app
+      def initialize
         reset!
       end
 
@@ -101,13 +79,11 @@ module ActionController
 
         self.host        = "www.example.com"
         self.remote_addr = "127.0.0.1"
-        self.accept      = "text/xml,application/xml,application/xhtml+xml," +
-                           "text/html;q=0.9,text/plain;q=0.8,image/png," +
-                           "*/*;q=0.5"
+        self.accept      = "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5"
 
         unless defined? @named_routes_configured
           # install the named routes in this session instance.
-          klass = class << self; self; end
+          klass = class<<self; self; end
           Routing::Routes.install_helpers(klass)
 
           # the helpers are made protected by default--we make them public for
@@ -121,7 +97,7 @@ module ActionController
       #
       #   session.https!
       #   session.https!(false)
-      def https!(flag = true)
+      def https!(flag=true)
         @https = flag
       end
 
@@ -146,7 +122,7 @@ module ActionController
       # performed on the location header.
       def follow_redirect!
         raise "not a redirect! #{@status} #{@status_message}" unless redirect?
-        get(interpret_uri(headers['location']))
+        get(interpret_uri(headers['location'].first))
         status
       end
 
@@ -191,21 +167,17 @@ module ActionController
 
       # Performs a GET request with the given parameters.
       #
-      # - +path+: The URI (as a String) on which you want to perform a GET
-      #   request.
-      # - +parameters+: The HTTP parameters that you want to pass. This may
-      #   be +nil+,
+      # - +path+: The URI (as a String) on which you want to perform a GET request.
+      # - +parameters+: The HTTP parameters that you want to pass. This may be +nil+,
       #   a Hash, or a String that is appropriately encoded
-      #   (<tt>application/x-www-form-urlencoded</tt> or
-      #   <tt>multipart/form-data</tt>).
+      #   (<tt>application/x-www-form-urlencoded</tt> or <tt>multipart/form-data</tt>).
       # - +headers+: Additional HTTP headers to pass, as a Hash. The keys will
       #   automatically be upcased, with the prefix 'HTTP_' added if needed.
       #
-      # This method returns an Response object, which one can use to
-      # inspect the details of the response. Furthermore, if this method was
-      # called from an ActionController::IntegrationTest object, then that
-      # object's <tt>@response</tt> instance variable will point to the same
-      # response object.
+      # This method returns an AbstractResponse object, which one can use to inspect
+      # the details of the response. Furthermore, if this method was called from an
+      # ActionController::IntegrationTest object, then that object's <tt>@response</tt>
+      # instance variable will point to the same response object.
       #
       # You can also perform POST, PUT, DELETE, and HEAD requests with +post+,
       # +put+, +delete+, and +head+.
@@ -213,26 +185,22 @@ module ActionController
         process :get, path, parameters, headers
       end
 
-      # Performs a POST request with the given parameters. See get() for more
-      # details.
+      # Performs a POST request with the given parameters. See get() for more details.
       def post(path, parameters = nil, headers = nil)
         process :post, path, parameters, headers
       end
 
-      # Performs a PUT request with the given parameters. See get() for more
-      # details.
+      # Performs a PUT request with the given parameters. See get() for more details.
       def put(path, parameters = nil, headers = nil)
         process :put, path, parameters, headers
       end
 
-      # Performs a DELETE request with the given parameters. See get() for
-      # more details.
+      # Performs a DELETE request with the given parameters. See get() for more details.
       def delete(path, parameters = nil, headers = nil)
         process :delete, path, parameters, headers
       end
 
-      # Performs a HEAD request with the given parameters. See get() for more
-      # details.
+      # Performs a HEAD request with the given parameters. See get() for more details.
       def head(path, parameters = nil, headers = nil)
         process :head, path, parameters, headers
       end
@@ -247,64 +215,16 @@ module ActionController
       def xml_http_request(request_method, path, parameters = nil, headers = nil)
         headers ||= {}
         headers['X-Requested-With'] = 'XMLHttpRequest'
-        headers['Accept'] ||= [Mime::JS, Mime::HTML, Mime::XML, 'text/xml', Mime::ALL].join(', ')
+        headers['Accept'] ||= 'text/javascript, text/html, application/xml, text/xml, */*'
+
         process(request_method, path, parameters, headers)
       end
       alias xhr :xml_http_request
 
-      def request_with_noauth(http_method, uri, parameters, headers) 
-        process_with_auth http_method, uri, parameters, headers
-      end 
-
-      # Performs a request with the given http_method and parameters, including HTTP Basic authorization headers. 
-      # See get() for more details on paramters and headers. 
-      # 
-      # You can perform GET, POST, PUT, DELETE, and HEAD requests with #get_with_basic, #post_with_basic, 
-      # #put_with_basic, #delete_with_basic, and #head_with_basic. 
-      def request_with_basic(http_method, uri, parameters, headers, user_name, password) 
-        process_with_auth http_method, uri, parameters, headers.merge(:authorization => ActionController::HttpAuthentication::Basic.encode_credentials(user_name, password)) 
-      end 
-
-      # Performs a request with the given http_method and parameters, including HTTP Digest authorization headers. 
-      # See get() for more details on paramters and headers. 
-      # 
-      # You can perform GET, POST, PUT, DELETE, and HEAD requests with #get_with_digest, #post_with_digest, 
-      # #put_with_digest, #delete_with_digest, and #head_with_digest. 
-      def request_with_digest(http_method, uri, parameters, headers, user_name, password) 
-        # Realm, Nonce, and Opaque taken from previoius 401 response
-        
-        credentials = {
-          :username => user_name,
-          :realm    => @realm,
-          :nonce    => @nonce,
-          :qop      => "auth",
-          :nc       => "00000001",
-          :cnonce   => "0a4f113b",
-          :opaque   => @opaque,
-          :uri      => uri
-        }
-        
-        raise "Digest request without previous 401 response" if @opaque.nil?
- 
-        process_with_auth http_method, uri, parameters, headers.merge(:authorization => ActionController::HttpAuthentication::Digest.encode_credentials(http_method, credentials, password)) 
-      end 
-
-      # def get_with_basic, def post_with_basic, def put_with_basic, def delete_with_basic, def head_with_basic 
-      # def get_with_digest, def post_with_digest, def put_with_digest, def delete_with_digest, def head_with_digest 
-      [:get, :post, :put, :delete, :head].each do |method| 
-        [:noauth, :basic, :digest].each do |auth_type| 
-          define_method("#{method}_with_#{auth_type}") do |uri, parameters, headers, *auth| 
-            send("request_with_#{auth_type}", method, uri, parameters, headers, *auth) 
-          end 
-        end 
-      end
-
       # Returns the URL for the given options, according to the rules specified
       # in the application's routes.
       def url_for(options)
-        controller ?
-          controller.url_for(options) :
-          generic_url_rewriter.rewrite(options)
+        controller ? controller.url_for(options) : generic_url_rewriter.rewrite(options)
       end
 
       private
@@ -330,35 +250,17 @@ module ActionController
             data = nil
           end
 
-          env["QUERY_STRING"] ||= ""
-
-          data = data.is_a?(IO) ? data : StringIO.new(data || '')
-
           env.update(
-            "REQUEST_METHOD"  => method.to_s.upcase,
-            "SERVER_NAME"     => host,
-            "SERVER_PORT"     => (https? ? "443" : "80"),
-            "HTTPS"           => https? ? "on" : "off",
-            "rack.url_scheme" => https? ? "https" : "http",
-            "SCRIPT_NAME"     => "",
-
+            "REQUEST_METHOD" => method.to_s.upcase,
             "REQUEST_URI"    => path,
-            "PATH_INFO"      => path,
             "HTTP_HOST"      => host,
             "REMOTE_ADDR"    => remote_addr,
+            "SERVER_PORT"    => (https? ? "443" : "80"),
             "CONTENT_TYPE"   => "application/x-www-form-urlencoded",
             "CONTENT_LENGTH" => data ? data.length.to_s : nil,
             "HTTP_COOKIE"    => encode_cookies,
-            "HTTP_ACCEPT"    => accept,
-
-            "rack.version"      => [0,1],
-            "rack.input"        => data,
-            "rack.errors"       => StringIO.new,
-            "rack.multithread"  => true,
-            "rack.multiprocess" => true,
-            "rack.run_once"     => false,
-
-            "rack.test" => true
+            "HTTPS"          => https? ? "on" : "off",
+            "HTTP_ACCEPT"    => accept
           )
 
           (headers || {}).each do |key, value|
@@ -373,76 +275,48 @@ module ActionController
 
           ActionController::Base.clear_last_instantiation!
 
-          app = Rack::Lint.new(@application)
-
-          status, headers, body = app.call(env)
+          env['rack.input'] = data.is_a?(IO) ? data : StringIO.new(data || '')
+          @status, @headers, result_body = ActionController::Dispatcher.new.mark_as_test_request!.call(env)
           @request_count += 1
+
+          @controller = ActionController::Base.last_instantiation
+          @request = @controller.request
+          @response = @controller.response
+
+          # Decorate the response with the standard behavior of the TestResponse
+          # so that things like assert_response can be used in integration
+          # tests.
+          @response.extend(TestResponseBehavior)
 
           @html_document = nil
 
-          @status = status.to_i
-          @status_message = StatusCodes::STATUS_CODES[@status]
+          # Inject status back in for backwords compatibility with CGI
+          @headers['Status'] = @status
 
-          @headers = Rack::Utils::HeaderHash.new(headers)
+          @status, @status_message = @status.split(/ /)
+          @status = @status.to_i
 
-          (@headers['Set-Cookie'] || []).each do |cookie|
+          cgi_headers = Hash.new { |h,k| h[k] = [] }
+          @headers.each do |key, value|
+            cgi_headers[key.downcase] << value
+          end
+          cgi_headers['set-cookie'] = cgi_headers['set-cookie'].first
+          @headers = cgi_headers
+
+          @response.headers['cookie'] ||= []
+          (@headers['set-cookie'] || []).each do |cookie|
             name, value = cookie.match(/^([^=]*)=([^;]*);/)[1,2]
             @cookies[name] = value
+
+            # Fake CGI cookie header
+            # DEPRECATE: Use response.headers["Set-Cookie"] instead
+            @response.headers['cookie'] << CGI::Cookie::new("name" => name, "value" => value)
           end
 
-          @body = ""
-          body.each { |part| @body << part }
-
-          if @controller = ActionController::Base.last_instantiation
-            @request = @controller.request
-            @response = @controller.response
-          else
-            # Decorate responses from Rack Middleware and Rails Metal
-            # as an Response for the purposes of integration testing
-            @response = Response.new
-            @response.status = status.to_s
-            @response.headers.replace(@headers)
-            @response.body = @body
-          end
-
-          # Decorate the response with the standard behavior of the
-          # TestResponse so that things like assert_response can be
-          # used in integration tests.
-          @response.extend(TestResponseBehavior)
-
-          return @status
+          return status
         rescue MultiPartNeededException
           boundary = "----------XnJLe9ZIbbGUYtzPQJ16u1"
-          status = process(method, path,
-            multipart_body(parameters, boundary),
-            (headers || {}).merge(
-              {"CONTENT_TYPE" => "multipart/form-data; boundary=#{boundary}"}))
-          return status
-        end
-
-        # Same as process, but handles authentication returns to perform
-        # Basic or Digest authentication
-        def process_with_auth(method, path, parameters = nil, headers = nil)
-          status = process(method, path, parameters, headers)
-
-          if status == 401
-            # Extract authentication information from response
-            auth_data = @response.headers['WWW-Authenticate']
-            if /^Basic /.match(auth_data)
-              # extract realm, to be used in subsequent request
-              @realm = auth_header.split(' ')[1]
-            elsif /^Digest/.match(auth_data)
-              creds = auth_data.to_s.gsub(/^Digest\s+/,'').split(',').inject({}) do |hash, pair| 
-                key, value = pair.split('=', 2) 
-                hash[key.strip.to_sym] = value.to_s.gsub(/^"|"$/,'').gsub(/'/, '') 
-                hash 
-              end 
-              @realm = creds[:realm]
-              @nonce = creds[:nonce]
-              @opaque = creds[:opaque]
-            end
-          end
-
+          status = process(method, path, multipart_body(parameters, boundary), (headers || {}).merge({"CONTENT_TYPE" => "multipart/form-data; boundary=#{boundary}"}))
           return status
         end
 
@@ -464,7 +338,7 @@ module ActionController
             "SERVER_PORT"    => https? ? "443" : "80",
             "HTTPS"          => https? ? "on" : "off"
           }
-          UrlRewriter.new(Request.new(env), {})
+          ActionController::UrlRewriter.new(ActionController::RackRequest.new(env), {})
         end
 
         def name_with_prefix(prefix, name)
@@ -478,13 +352,9 @@ module ActionController
             raise MultiPartNeededException
           elsif Hash === parameters
             return nil if parameters.empty?
-            parameters.map { |k,v|
-              requestify(v, name_with_prefix(prefix, k))
-            }.join("&")
+            parameters.map { |k,v| requestify(v, name_with_prefix(prefix, k)) }.join("&")
           elsif Array === parameters
-            parameters.map { |v|
-              requestify(v, name_with_prefix(prefix, ""))
-            }.join("&")
+            parameters.map { |v| requestify(v, name_with_prefix(prefix, "")) }.join("&")
           elsif prefix.nil?
             parameters
           else
@@ -590,9 +460,8 @@ EOF
       # By default, a single session is automatically created for you, but you
       # can use this method to open multiple sessions that ought to be tested
       # simultaneously.
-      def open_session(application = nil)
-        application ||= ActionController::Dispatcher.new
-        session = Integration::Session.new(application)
+      def open_session
+        session = Integration::Session.new
 
         # delegate the fixture accessors back to the test instance
         extras = Module.new { attr_accessor :delegate, :test_result }
@@ -600,16 +469,12 @@ EOF
           self.class.fixture_table_names.each do |table_name|
             name = table_name.tr(".", "_")
             next unless respond_to?(name)
-            extras.__send__(:define_method, name) { |*args|
-              delegate.send(name, *args)
-            }
+            extras.__send__(:define_method, name) { |*args| delegate.send(name, *args) }
           end
         end
 
         # delegate add_assertion to the test case
-        extras.__send__(:define_method, :add_assertion) {
-          test_result.add_assertion
-        }
+        extras.__send__(:define_method, :add_assertion) { test_result.add_assertion }
         session.extend(extras)
         session.delegate = self
         session.test_result = @_result
@@ -737,8 +602,7 @@ EOF
     # would potentially have to set their values for both Test::Unit::TestCase
     # ActionController::IntegrationTest, since by the time the value is set on
     # TestCase, IntegrationTest has already been defined and cannot inherit
-    # changes to those variables. So, we make those two attributes
-    # copy-on-write.
+    # changes to those variables. So, we make those two attributes copy-on-write.
 
     class << self
       def use_transactional_fixtures=(flag) #:nodoc:

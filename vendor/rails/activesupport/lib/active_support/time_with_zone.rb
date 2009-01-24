@@ -1,5 +1,4 @@
 require 'tzinfo'
-
 module ActiveSupport
   # A Time-like class that can represent a time in any time zone. Necessary because standard Ruby Time instances are
   # limited to UTC and the system's <tt>ENV['TZ']</tt> zone.
@@ -234,9 +233,9 @@ module ActiveSupport
 
     %w(year mon month day mday wday yday hour min sec to_date).each do |method_name|
       class_eval <<-EOV
-        def #{method_name}     # def year
-          time.#{method_name}  #   time.year
-        end                    # end
+        def #{method_name}
+          time.#{method_name}
+        end
       EOV
     end
 

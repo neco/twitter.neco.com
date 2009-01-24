@@ -45,27 +45,29 @@ class CacheStoreSettingTest < Test::Unit::TestCase
   end
 end
 
-class CacheStoreTest < Test::Unit::TestCase
-  def setup
-    @cache = ActiveSupport::Cache.lookup_store(:memory_store)
-  end
+uses_mocha 'high-level cache store tests' do
+  class CacheStoreTest < Test::Unit::TestCase
+    def setup
+      @cache = ActiveSupport::Cache.lookup_store(:memory_store)
+    end
 
-  def test_fetch_without_cache_miss
-    @cache.stubs(:read).with('foo', {}).returns('bar')
-    @cache.expects(:write).never
-    assert_equal 'bar', @cache.fetch('foo') { 'baz' }
-  end
+    def test_fetch_without_cache_miss
+      @cache.stubs(:read).with('foo', {}).returns('bar')
+      @cache.expects(:write).never
+      assert_equal 'bar', @cache.fetch('foo') { 'baz' }
+    end
 
-  def test_fetch_with_cache_miss
-    @cache.stubs(:read).with('foo', {}).returns(nil)
-    @cache.expects(:write).with('foo', 'baz', {})
-    assert_equal 'baz', @cache.fetch('foo') { 'baz' }
-  end
+    def test_fetch_with_cache_miss
+      @cache.stubs(:read).with('foo', {}).returns(nil)
+      @cache.expects(:write).with('foo', 'baz', {})
+      assert_equal 'baz', @cache.fetch('foo') { 'baz' }
+    end
 
-  def test_fetch_with_forced_cache_miss
-    @cache.expects(:read).never
-    @cache.expects(:write).with('foo', 'bar', :force => true)
-    @cache.fetch('foo', :force => true) { 'bar' }
+    def test_fetch_with_forced_cache_miss
+      @cache.expects(:read).never
+      @cache.expects(:write).with('foo', 'bar', :force => true)
+      @cache.fetch('foo', :force => true) { 'bar' }
+    end
   end
 end
 

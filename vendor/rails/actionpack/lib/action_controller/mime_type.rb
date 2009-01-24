@@ -25,7 +25,7 @@ module Mime
     # These are the content types which browsers can generate without using ajax, flash, etc
     # i.e. following a link, getting an image or posting a form.  CSRF protection
     # only needs to protect against these types.
-    @@browser_generated_types = Set.new [:html, :url_encoded_form, :multipart_form, :text]
+    @@browser_generated_types = Set.new [:html, :url_encoded_form, :multipart_form]
     cattr_reader :browser_generated_types
 
 
@@ -176,16 +176,8 @@ module Mime
       end
     end
 
-    def =~(mime_type)
-      return false if mime_type.blank?
-      regexp = Regexp.new(Regexp.quote(mime_type.to_s))
-      (@synonyms + [ self ]).any? do |synonym|
-        synonym.to_s =~ regexp
-      end
-    end
-
     # Returns true if Action Pack should check requests using this Mime Type for possible request forgery.  See
-    # ActionController::RequestForgeryProtection.
+    # ActionController::RequestForgerProtection.
     def verify_request?
       browser_generated?
     end
