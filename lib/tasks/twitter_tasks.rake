@@ -6,7 +6,7 @@ namespace :twitter do
       
       query = {:id => user.screen_name}
       query[:count] = 200 # this is the maximum allowed
-      query[:since_id] = user.tweets.first.tweet_id unless user.tweets.empty?
+      query[:since_id] = user.tweets.from_twitter.first.tweet_id unless user.tweets.empty?
       
       new_tweets = twitter.timeline(:user, :query => query)
       
@@ -20,6 +20,9 @@ namespace :twitter do
         user.twitter_id = user_info['id'] 
         user.save
       end
+      
+      # we have the new tweets now, so let them replace the tweets we manually inserted
+      user.tweets.from_local.each {|tweet| tweet.destroy }
       
       new_tweets.each do |tweet|
         user.tweets.create({

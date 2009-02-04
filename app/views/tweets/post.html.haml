@@ -1,0 +1,18 @@
+%h1 Post a message to Twitter
+- if @error
+  .error= @error
+= form_tag url_for(:action => 'create_tweet')
+Username
+%br/
+%input{:type => :text, :name => :username}/
+.spacer
+Password
+%br/
+%input{:type => :password, :name => :password}/
+.spacer
+Message
+%br/
+%input{:type => :text, :style => 'width:80%', :maxlength => 140, :name => :message}/
+.spacer
+%input{:type => :submit, :value => 'Post!'}/
+.spacer

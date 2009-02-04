@@ -15,4 +15,9 @@ class Twitter
     self.class.get("/statuses/#{which}_timeline.json", options)
   end
   
+  def post(text)
+    self.class.basic_auth @auth[:username], @auth[:password]
+    self.class.post('/statuses/update.json', :query => {:status => text})
+  end
+  
 end

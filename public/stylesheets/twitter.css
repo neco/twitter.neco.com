@@ -3,6 +3,17 @@
   clear: left;
 }
 
+.spacer {
+  height: 12px;
+}
+
+.error {
+  border: 2px solid red;
+  margin: 10px 0;
+  padding: 10px;
+  width: 40%;
+}
+
 #profile { margin-top: 20px; }
 
 #profile .user_image { float:left; }

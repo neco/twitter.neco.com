@@ -7,4 +7,21 @@ class TweetsController < ApplicationController
     @search = Tweet.new_search(search_opts)
     @tweets, @tweets_count = @search.all, @search.count
   end
+  
+  def post
+  end
+  
+  def create_tweet
+    username, password, message = params[:username], params[:password], params[:message]
+    twitter = Twitter.new(username, password)
+    begin
+      twitter.post(message)
+      twitter_user = TwitterUser.find_by_screen_name(username)
+      twitter_user.tweets.create :tweeted_at => Time.now, :tweet_text => message
+      redirect_to :action => 'index'
+    rescue
+      @error = 'Bad username or password.'
+      render :action => 'post'
+    end
+  end
 end
