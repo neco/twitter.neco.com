@@ -2,13 +2,21 @@
 - if @error
   .error= @error
 = form_tag url_for(:action => 'create_tweet')
-Username
-%br/
-%input{:type => :text, :name => :username}/
-.spacer
-Password
-%br/
-%input{:type => :password, :name => :password}/
+- if remembered?
+  Logged in as 
+  = session[:twitter_username]
+  == (#{link_to 'forget me', url_for(:action => 'forget_me')})
+- else
+  Username
+  %br/
+  %input{:type => :text, :name => :username}/
+  .spacer
+  Password
+  %br/
+  %input{:type => :password, :name => :password}/
+  .spacer
+  %input{:type => :checkbox, :name => :remember}/
+  Remember me
 .spacer
 Message
 %br/
