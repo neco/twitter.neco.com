@@ -1,7 +1,7 @@
 = link_to '&lt;-- Back to all users', url_for(:controller => 'tweets', :action => 'index')
 
 #profile
-  = image_tag(@twitter_user.profile_image_url, :class => 'user_image')
+  = image_tag(@twitter_user.profile_image_url, :class => 'user_image') if @twitter_user.profile_image_url
   %h1= @twitter_user.screen_name
   
   #profile-details

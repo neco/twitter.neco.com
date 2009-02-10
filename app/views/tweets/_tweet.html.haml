@@ -1,7 +1,7 @@
 %div{:class => "tweet#{' first' if tweet_counter == 0}"}
-  = link_to image_tag(tweet.twitter_user.profile_image_url, :class => 'user_image'), profile_path(:screen_name => tweet.twitter_user.screen_name) if tweet.twitter_user
+  = link_to image_tag(tweet.twitter_user.profile_image_url, :class => 'user_image'), profile_path(:screen_name => tweet.twitter_user.screen_name) if tweet.twitter_user.profile_image_url
   .content
     .text= parse_tweet(tweet.tweet_text)
     .details
-      = link_to tweet.twitter_user.screen_name, profile_path(:screen_name => tweet.twitter_user.screen_name) if tweet.twitter_user
+      = link_to tweet.twitter_user.screen_name, profile_path(:screen_name => tweet.twitter_user.screen_name)
       = tweet.tweeted_at.strftime('%l:%M %p Eastern - %a %D')
