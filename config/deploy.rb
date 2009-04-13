@@ -1,7 +1,7 @@
 default_run_options[:pty] = true
 
 set :application, "twitter.neco.com"
-set :repository,  "git@github.com:binarylogic/twitter.neco.com.git"
+set :repository,  "git@github.com:neco/twitter.neco.com.git"
 set :keep_releases, 5
 
 set :scm, :git
